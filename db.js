@@ -7,7 +7,7 @@ const mongoURL =`mongodb+srv://inotebook:${D_PASSWORD}@cluster0.xteaiks.mongodb.
 
 
 const connectToMongo=()=>{
-    mongoose.connect(mongoURL,{useCreateIndex: true},()=>{
+    mongoose.connect(mongoURL,()=>{
         console.log('connected to Mongo successfully');
     })
 };
