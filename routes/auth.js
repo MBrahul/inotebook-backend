@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 const fatchUser = require('../middlewares/fatchuser');
 
 
-require('dotenv').config({path:'.env'});
+require('dotenv').config({ path: '.env' });
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ROUTE :1   create user using post: no login require (/createUser)
@@ -23,7 +23,10 @@ router.post('/createUser', [body('name', 'Name must be 3 letters').isLength({ mi
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({
+      created: false,
+      error: errors.array()
+    });
   }
 
   // check whether the user with this email exits already
@@ -34,7 +37,10 @@ router.post('/createUser', [body('name', 'Name must be 3 letters').isLength({ mi
     let user = await User.findOne({ email: req.body.email });
 
     if (user) {
-      return res.status(400).json({ error: "A user already exists with this email" })
+      return res.status(400).json({
+        created: false,
+        error: "A user already exists with this email"
+      })
 
     }
     const salt = await bcrypt.genSalt(10);
@@ -64,7 +70,10 @@ router.post('/createUser', [body('name', 'Name must be 3 letters').isLength({ mi
   }
 
   catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      created: false,
+      error: error.message
+    });
   }
 
 
@@ -80,8 +89,10 @@ router.post('/login', [body('email', 'Enter valid email').isEmail(), body('passw
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      res.status(400).json({ error: 'Enter correct credentials' });
-
+      res.status(400).json({
+        login: false,
+        error: "user does not exist"
+      });
     }
     else {
       bcrypt.compare(password, user.password, function (err, res2) {
@@ -94,14 +105,13 @@ router.post('/login', [body('email', 'Enter valid email').isEmail(), body('passw
           };
           const jwtToken = jwt.sign(data, JWT_SECRET);
           res.json({
-            "login": true,
-            "name":user.name,
-            "token": jwtToken
+            login: true,
+            name: user.name,
+            token: jwtToken
           });
         }
-
         else {
-          res.status(400).json({ error: 'Enter correct Credentials' });
+          res.status(400).json({ "login": false });
         }
       });
     }
